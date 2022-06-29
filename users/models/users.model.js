@@ -2,11 +2,17 @@ const mongoose = require('../../common/services/mongoose.service').mongoose;
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
-    username: String,
+    username: {
+        type: String,
+        required : true
+    },
     firstName: String,
     lastName: String,
     email: String,
-    password: String,
+    password: {
+        type: String,
+        required : true
+    },
     sex: String,
     birthday: Date,
     positionPreference: [mongoose.Types.ObjectId],

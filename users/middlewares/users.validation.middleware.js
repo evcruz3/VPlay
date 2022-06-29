@@ -16,12 +16,12 @@ exports.emailIsNotTaken = (req, res, next) => {
         })
 }
 
-exports.hasUsername = (req, res, next) => {
-    if(req.body.username){
+exports.hasPassword = (req, res, next) => {
+    if(req.body.password){
         next()
     }
     else{
-        res.status(400).send({error:'missing username field'});
+        res.status(400).send({error:'missing password field'});
     }
 }
 

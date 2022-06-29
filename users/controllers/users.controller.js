@@ -1,6 +1,7 @@
 const UserModel = require('../models/users.model');
 const crypto = require('crypto');
 const ADMIN_PERMISSION = require('../../common/config/env.config')['permissionLevels']['ADMIN'];
+const mongoose = require('../../common/services/mongoose.service').mongoose;
 
 exports.insert = (req, res) => {
     let salt = crypto.randomBytes(16).toString('base64');
@@ -10,6 +11,9 @@ exports.insert = (req, res) => {
     UserModel.createUser(req.body)
         .then((result) => {
             res.status(201).send({id: result._id});
+        }).catch((e) => {
+            res.status(400).send(e)
+            res.status(400).send({error: e.name})
         });
 };
 
