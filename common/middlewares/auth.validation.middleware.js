@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken'),
     secret = require('../config/env.config.js').jwt_secret,
+    env = require('../config/env.config.js').environment,
     crypto = require('crypto');
 
 exports.verifyRefreshBodyField = (req, res, next) => {

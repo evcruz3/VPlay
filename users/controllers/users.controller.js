@@ -1,5 +1,6 @@
 const UserModel = require('../models/users.model');
 const crypto = require('crypto');
+const ADMIN_PERMISSION = require('../../common/config/env.config')['permissionLevels']['ADMIN'];
 
 exports.insert = (req, res) => {
     let salt = crypto.randomBytes(16).toString('base64');
@@ -34,10 +35,18 @@ exports.getById = (req, res) => {
         });
 };
 exports.patchById = (req, res) => {
+    let user_permission_level = parseInt(req.jwt.permissionLevel);
+
     if (req.body.password) {
         let salt = crypto.randomBytes(16).toString('base64');
         let hash = crypto.createHmac('sha512', salt).update(req.body.password).digest("base64");
         req.body.password = salt + "$" + hash;
+    }
+
+    if (!(user_permission_level & ADMIN_PERMISSION)) {
+        if(req.body.permissionLevel){
+            delete req.body.permissionLevel
+        }
     }
 
     UserModel.patchUser(req.params.userId, req.body)
