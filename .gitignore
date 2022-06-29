@@ -3,6 +3,3 @@
 data
 yarn.lock
 ~*.xlsx
-events/routes.config.js
-events/controllers/events.controller.js
-events/models/events.model.js
