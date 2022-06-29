@@ -22,9 +22,9 @@ userSchema.set('toJSON', {
     virtuals: true
 });
 
-userSchema.findById = function (cb) {
-    return this.model('Users').find({id: this.id}, cb);
-};
+// userSchema.findById = function (cb) {
+//     return this.model('Users').find({id: this.id}, cb);
+// };
 
 const User = mongoose.model('Users', userSchema);
 
@@ -48,6 +48,8 @@ exports.findById = (id) => {
             result = result.toJSON();
             delete result._id;
             delete result.__v;
+            delete result.password;
+            delete result.permissionLevel;
             return result;
         });
 };
@@ -57,6 +59,7 @@ exports.createUser = (userData) => {
     return user.save();
 };
 
+// Used by admin
 exports.list = (perPage, page) => {
     return new Promise((resolve, reject) => {
         User.find()
