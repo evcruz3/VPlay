@@ -1,14 +1,9 @@
-const UserModel = require('../models/users.model');
+const EventModel = require('../models/events.model');
 const crypto = require('crypto');
 const ADMIN_PERMISSION = require('../../common/config/env.config')['permissionLevels']['ADMIN'];
-const mongoose = require('../../common/services/mongoose.service').mongoose;
 
 exports.insert = (req, res) => {
-    let salt = crypto.randomBytes(16).toString('base64');
-    let hash = crypto.createHmac('sha512', salt).update(req.body.password).digest("base64");
-    req.body.password = salt + "$" + hash;
-    req.body.permissionLevel = 1;
-    UserModel.createUser(req.body)
+    EventModel.createEvent(req.body)
         .then((result) => {
             res.status(201).send({id: result._id});
         }).catch((e) => {
@@ -26,34 +21,32 @@ exports.list = (req, res) => {
             page = Number.isInteger(req.query.page) ? req.query.page : 0;
         }
     }
-    UserModel.list(limit, page)
+    EventModel.list(limit, page)
         .then((result) => {
             res.status(200).send(result);
         })
 };
 
 exports.getById = (req, res) => {
-    UserModel.findById(req.params.userId)
+    EventModel.findById(req.params.eventId)
         .then((result) => {
             res.status(200).send(result);
         });
 };
 exports.patchById = (req, res) => {
+
+    // Host may modify the event except for the following:
+    
     let user_permission_level = parseInt(req.jwt.permissionLevel);
 
-    if (req.body.password) {
-        let salt = crypto.randomBytes(16).toString('base64');
-        let hash = crypto.createHmac('sha512', salt).update(req.body.password).digest("base64");
-        req.body.password = salt + "$" + hash;
+    if (!(user_permission_level >= ADMIN_PERMISSION)) {
+        req.body.type ? delete req.body.type : '';
+        req.body.status ? delete req.body.status : '';
+        req.body.host ? delete req.body.host : '';
+        req.body.season ? delete req.body.season : '';
     }
 
-    if (!(user_permission_level & ADMIN_PERMISSION)) {
-        if(req.body.permissionLevel){
-            delete req.body.permissionLevel
-        }
-    }
-
-    UserModel.patchUser(req.params.userId, req.body)
+    EventModel.patchEvent(req.params.eventId, req.body)
         .then((result) => {
             res.status(204).send({});
         });
@@ -61,7 +54,7 @@ exports.patchById = (req, res) => {
 };
 
 exports.removeById = (req, res) => {
-    UserModel.removeById(req.params.userId)
+    EventModel.removeById(req.params.eventId)
         .then((result)=>{
             res.status(204).send({});
         });
