@@ -1,4 +1,5 @@
 const UsersController = require('./controllers/users.controller');
+const MatchStatsController = require('./controllers/matchstats.controller');
 const PermissionMiddleware = require('../common/middlewares/auth.permission.middleware');
 const ValidationMiddleware = require('../common/middlewares/auth.validation.middleware');
 const UserValidationMiddleware = require('../users/middlewares/users.validation.middleware');
@@ -39,6 +40,14 @@ exports.routesConfig = function (app) {
         ValidationMiddleware.validJWTNeeded,
         PermissionMiddleware.minimumPermissionLevelRequired(FREE),
         PermissionMiddleware.onlySameUserOrAdminCanDoThisAction,
+        MatchStatsController.removeUserMatchStats,
         UsersController.removeById
     ]);
+
+    app.get('/users/:userId/stats', [
+        ValidationMiddleware.validJWTNeeded,
+        PermissionMiddleware.minimumPermissionLevelRequired(FREE),
+        PermissionMiddleware.onlySameUserOrAdminCanDoThisAction,
+        MatchStatsController.find
+    ])
 };
