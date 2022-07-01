@@ -64,7 +64,6 @@ exports.removeUserMatchStats = (userId) => {
         .then(function(res){
             resolve(res)
         }).catch(function(error){
-            console.log(error)
             reject(error);
         });
     });

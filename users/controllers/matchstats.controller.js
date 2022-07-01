@@ -18,7 +18,6 @@ exports.find = (req, res) => {
     if(req.query.season) query.season = req.query.season;
     if(req.query.type) query.type = req.query.type;
 
-    console.log(query)
     MatchStatModel.find(query)
         .then((result) => {
             res.status(200).send(result);

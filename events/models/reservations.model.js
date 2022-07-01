@@ -2,74 +2,61 @@ const mongoose = require('../../common/services/mongoose.service').mongoose;
 const Schema = mongoose.Schema;
 const ObjectId = mongoose.Types.ObjectId
 
-const eventSchema = new Schema({
-    name: String,
-    description: String,
-    type: {
+const reservationSchema = new Schema({
+    position: {
         type: String,
-        enum: ['rated', 'unrated', 'custom'],
+        enum: ['open','opposite','middle','setter','libero'],
+        required: true
+    },
+    playerId: {
+        type: mongoose.Types.ObjectId,
         required: true
     },
     status: {
         type: String,
-        enum: ['open', 'ongoing', 'canceled', 'finished', 'locked'],
+        enum: ['waiting','granted','canceled','not granted'],
         required: true
     },
-    maxTeam : {
-        type: Number,
-        min: 2
-    },
-    pricePerPlayer : Number,
-    libero : {
-        type: Boolean,
-        required: true,
-    },
-    date: {
-        type: Date,
-        required : true
-    },
-    venue : mongoose.Types.ObjectId,
-    host : {
+    eventId: {
         type: mongoose.Types.ObjectId,
-        required : true
+        required: true
     },
-    season : {
-        type: Number,
+    groupId: {
+        type: String,
         required: true
     }
 });
 
-eventSchema.virtual('id').get(function () {
+reservationSchema.virtual('id').get(function () {
     return this._id.toHexString();
 });
 
 // Ensure virtual fields are serialised.
-eventSchema.set('toJSON', {
+reservationSchema.set('toJSON', {
     virtuals: true
 });
 
-const Event = mongoose.model('Events', eventSchema);
-
+const Reservation = mongoose.model('Reservations', reservationSchema);
 
 exports.findByName = (name) => {
-    return Event.find({name: name});
+    return Reservation.find({name: name});
 };
 
-exports.findByHostAndId = (hostId, eventId) => {
+exports.findByHostAndId = (hostId, reservationId) => {
     return new Promise((resolve, reject) => {
-        Event.find({_id: ObjectId(eventId), host: ObjectId(hostId)})
-            .exec(function (err, events) {
+        Reservation.find({_id: ObjectId(reservationId), host: ObjectId(hostId)})
+            .exec(function (err, reservations) {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(events);
+                    resolve(reservations);
                 }
             })
     });
 }
 
 exports.findById = (id) => {
-    return Event.findById(id)
+    return Reservation.findById(id)
         .then((result) => {
             result = result.toJSON();
             delete result._id;
@@ -78,23 +65,23 @@ exports.findById = (id) => {
         });
 };
 
-exports.createEvent = (eventData) => {
-    const event = new Event(eventData);
-    return event.save();
+exports.createReservation = (reservationData) => {
+    const reservation = new Reservation(reservationData);
+    return reservation.save();
 };
 
 // Used by admin
 exports.list = (perPage, page) => {
     return new Promise((resolve, reject) => {
-        Event.find()
+        Reservation.find()
             .select()
             .limit(perPage)
             .skip(perPage * page)
-            .exec(function (err, events) {
+            .exec(function (err, reservations) {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(events);
+                    resolve(reservations);
                 }
             })
     });
@@ -102,7 +89,7 @@ exports.list = (perPage, page) => {
 
 exports.find = (perPage, page, query) => {
     return new Promise((resolve, reject) => {
-        Event.find(query)
+        Reservation.find(query)
             .select("-__v -id")
             .limit(perPage)
             .skip(perPage * page)
@@ -118,7 +105,7 @@ exports.find = (perPage, page, query) => {
 
 exports.checkIfExisting = (query) => {
     return new Promise((resolve, reject) => {
-        Event.exists((query), function (err, results) {
+        Reservation.exists((query), function (err, results) {
             if (err) {
                 reject(err);
             } else {
@@ -128,15 +115,15 @@ exports.checkIfExisting = (query) => {
     });
 }
 
-exports.patchEvent = (id, eventData) => {
-    return Event.findOneAndUpdate({
+exports.patchReservation = (id, reservationData) => {
+    return Reservation.findOneAndUpdate({
         _id: id
-    }, eventData);
+    }, reservationData);
 };
 
-exports.removeById = (eventId) => {
+exports.removeById = (reservationId) => {
     return new Promise((resolve, reject) => {
-        Event.deleteMany({_id: eventId}, (err) => {
+        Reservation.deleteMany({_id: reservationId}, (err) => {
             if (err) {
                 reject(err);
             } else {

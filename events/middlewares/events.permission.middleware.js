@@ -27,8 +27,6 @@ exports.onlyHostOrAdminCanDoThisAction = (req, res, next) => {
             }
             else{
                 // Is not a host
-                console.log("user: ", userId)
-                console.log("event: ", eventId)
                 res.status(403).send({error: "You are not the host"});
             }
         }).catch((err) => {
