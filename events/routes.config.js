@@ -19,8 +19,8 @@ exports.routesConfig = function (app) {
 
     app.get('/events', [
         ValidationMiddleware.validJWTNeeded,
-        PermissionMiddleware.minimumPermissionLevelRequired(ADMIN),
-        EventsController.list
+        PermissionMiddleware.minimumPermissionLevelRequired(FREE),
+        EventsController.find
     ]);
     app.get('/events/:eventId', [
         ValidationMiddleware.validJWTNeeded,
@@ -44,5 +44,12 @@ exports.routesConfig = function (app) {
         ValidationMiddleware.validJWTNeeded,
         PermissionMiddleware.minimumPermissionLevelRequired(ADMIN),
         EventsController.removeById
+    ]);
+
+    app.get('/events/hostedBy/:userId', [
+        ValidationMiddleware.validJWTNeeded,
+        PermissionMiddleware.minimumPermissionLevelRequired(FREE),
+        PermissionMiddleware.onlySameUserOrAdminCanDoThisAction,
+        EventsController.find
     ]);
 };

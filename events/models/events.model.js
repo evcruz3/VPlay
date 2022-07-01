@@ -100,6 +100,22 @@ exports.list = (perPage, page) => {
     });
 };
 
+exports.find = (perPage, page, query) => {
+    return new Promise((resolve, reject) => {
+        Event.find(query)
+            .select("-__v -id")
+            .limit(perPage)
+            .skip(perPage * page)
+            .exec(function (err, results) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(results);
+                }
+            })
+    });
+};
+
 exports.patchEvent = (id, eventData) => {
     return Event.findOneAndUpdate({
         _id: id

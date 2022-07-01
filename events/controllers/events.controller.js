@@ -31,6 +31,31 @@ exports.list = (req, res) => {
         })
 };
 
+exports.find = (req, res) => {
+    let limit = req.query.limit && req.query.limit <= 100 ? parseInt(req.query.limit) : 10;
+    let page = 0;
+    if (req.query) {
+        if (req.query.page) {
+            req.query.page = parseInt(req.query.page);
+            page = Number.isInteger(req.query.page) ? req.query.page : 0;
+        }
+    }
+    let query = req.params.userId ? {host : req.params.userId} : {};
+
+    if (req.query.type) query.type = req.query.type
+    if (req.query.status) query.status = req.query.status
+    if (req.query.libero) query.status = req.query
+    if (req.query.season) query.season = parseInt(req.query.season)
+
+    // In preparation for /events/joinedBy/:userId URI
+    if (req.query.eventIds) query.id = {$in : req.query.eventIds}
+
+    EventModel.find(limit, page, query)
+        .then((result) => {
+            res.status(200).send(result);
+        })
+}
+
 exports.getById = (req, res) => {
     EventModel.findById(req.params.eventId)
         .then((result) => {
