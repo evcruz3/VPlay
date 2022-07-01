@@ -1,5 +1,6 @@
 const mongoose = require('../../common/services/mongoose.service').mongoose;
 const Schema = mongoose.Schema;
+const ObjectId = mongoose.Types.ObjectId
 
 const eventSchema = new Schema({
     name: String,
@@ -54,6 +55,18 @@ exports.findByName = (name) => {
     return Event.find({name: name});
 };
 
+exports.findByHostAndId = (hostId, eventId) => {
+    return new Promise((resolve, reject) => {
+        Event.find({_id: ObjectId(eventId), host: ObjectId(hostId)})
+            .exec(function (err, events) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(events);
+                }
+            })
+    });
+}
 
 exports.findById = (id) => {
     return Event.findById(id)

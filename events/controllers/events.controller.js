@@ -1,8 +1,12 @@
 const EventModel = require('../models/events.model');
-const crypto = require('crypto');
-const ADMIN_PERMISSION = require('../../common/config/env.config')['permissionLevels']['ADMIN'];
+const config = require('../../common/config/env.config')
+const ADMIN_PERMISSION = config['permissionLevels']['ADMIN'];
+const season = config.season
 
 exports.insert = (req, res) => {
+    req.body.status = "open"
+    req.body.host = req.jwt.userId
+    req.body.season = season
     EventModel.createEvent(req.body)
         .then((result) => {
             res.status(201).send({id: result._id});
@@ -45,6 +49,21 @@ exports.patchById = (req, res) => {
         req.body.host ? delete req.body.host : '';
         req.body.season ? delete req.body.season : '';
     }
+
+    EventModel.patchEvent(req.params.eventId, req.body)
+        .then((result) => {
+            res.status(204).send({});
+        });
+
+};
+
+exports.cancelEvent = (req, res) => {
+
+    // Host may modify the event except for the following:
+    
+    let user_permission_level = parseInt(req.jwt.permissionLevel);
+
+    req.body.status = "canceled"
 
     EventModel.patchEvent(req.params.eventId, req.body)
         .then((result) => {

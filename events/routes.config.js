@@ -27,9 +27,16 @@ exports.routesConfig = function (app) {
         PermissionMiddleware.minimumPermissionLevelRequired(FREE),
         EventsController.getById
     ]);
+    app.get('/events/:eventId/cancel', [
+        ValidationMiddleware.validJWTNeeded,
+        PermissionMiddleware.minimumPermissionLevelRequired(PAID),
+        EventPermissionMiddleware.onlyHostOrAdminCanDoThisAction,
+        EventsController.cancelEvent
+    ]);
+
     app.patch('/events/:eventId', [
         ValidationMiddleware.validJWTNeeded,
-        PermissionMiddleware.minimumPermissionLevelRequired(FREE),
+        PermissionMiddleware.minimumPermissionLevelRequired(PAID),
         EventPermissionMiddleware.onlyHostOrAdminCanDoThisAction,
         EventsController.patchById
     ]);
