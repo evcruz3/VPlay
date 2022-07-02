@@ -3,8 +3,8 @@ const Schema = mongoose.Schema;
 const ObjectId = mongoose.Types.ObjectId
 
 const reservationSchema = new Schema({
-    position: {
-        type: String,
+    positionPreference: {
+        type: [String],
         enum: ['open','opposite','middle','setter','libero'],
         required: true
     },
@@ -71,9 +71,9 @@ exports.createReservation = (reservationData) => {
 };
 
 // Used by admin
-exports.list = (perPage, page) => {
+exports.list = (perPage, page, query) => {
     return new Promise((resolve, reject) => {
-        Reservation.find()
+        Reservation.find(query)
             .select()
             .limit(perPage)
             .skip(perPage * page)
@@ -86,6 +86,47 @@ exports.list = (perPage, page) => {
             })
     });
 };
+
+exports.groupedList = (perPage, page, query) => {
+    return new Promise((resolve, reject) => {
+        Reservation.aggregate([
+            {
+                $match: query
+            },
+            {
+                $skip: perPage*page
+            },
+            {
+                $limit: perPage
+            },
+            {
+                $sort: {
+                    "_id": -1
+                }
+            },
+            {
+                $group: {
+                    "_id": "$groupId",
+                    "timestamp" : {"$first" : {"$toDate":"$_id"}},
+                    total: {$sum: 1},
+                    reservations: {
+                        // $push: "$$ROOT"
+                        $push: {
+                            "positionPreference": "$positionPreference",
+                            "playerId": "$playerId",
+                            "status": "$status"
+                        }
+                    }
+                }
+            }
+        ], function(err, results){
+            if(err)
+                reject(err)
+            else
+                resolve(results)
+        })
+    });
+}
 
 exports.find = (perPage, page, query) => {
     return new Promise((resolve, reject) => {

@@ -56,6 +56,7 @@ exports.routesConfig = function (app) {
         EventsController.find
     ]);
 
+    // Reservations
     // TODO: Make sure reservation group has at most seven members only
     app.post('/events/:eventId/reservations', [
         ValidationMiddleware.validJWTNeeded,
@@ -64,4 +65,10 @@ exports.routesConfig = function (app) {
         ReservationValidationMiddleware.UserHasNotReservedYet,
         ReservationsController.insert
     ]);
+
+    app.get('/events/:eventId/reservations', [
+        ValidationMiddleware.validJWTNeeded,
+        PermissionMiddleware.minimumPermissionLevelRequired(ADMIN),
+        ReservationsController.list
+    ])
 };

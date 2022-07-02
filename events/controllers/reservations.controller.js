@@ -23,10 +23,31 @@ exports.list = (req, res) => {
             page = Number.isInteger(req.query.page) ? req.query.page : 0;
         }
     }
-    ReservationModel.list(limit, page)
+    let query = {eventId:ObjectId(req.params.eventId)}
+
+    if (req.query.groupId) query.groupId = req.query.groupId; // groupId is not an ObjectId
+    if (req.query.reservationId) query._id = ObjectId(req.query.reservationId);
+
+    console.log("req.query.grouped: ", req.query.grouped)
+    console.log("conditional status: ", req.query.grouped && req.query.grouped === 'true')
+
+    if (req.query.grouped && req.query.grouped === 'true'){
+        console.log("Grouped Listing...")
+        ReservationModel.groupedList(limit, page, query)
+        .then((result) => {
+            res.status(200).send(result)
+        }).catch((err) => {
+            res.status(400).send(err)
+        })
+    }
+    else{
+        console.log("Listing...")
+        ReservationModel.list(limit, page, query)
         .then((result) => {
             res.status(200).send(result);
         })
+    }
+    
 };
 
 exports.cancelReservation = (req, res) => {
