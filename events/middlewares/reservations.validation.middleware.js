@@ -8,7 +8,7 @@ exports.UserHasNotReservedYet = (req, res, next) => {
 
     let user_permission_level = parseInt(req.jwt.permissionLevel);
 
-    if(user_permission_level > ADMIN_PERMISSION){
+    if(user_permission_level >= ADMIN_PERMISSION){
         req.body.playerId = ObjectId(req.body.playerId)
     }
     else{

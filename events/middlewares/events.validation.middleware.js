@@ -28,7 +28,6 @@ exports.eventIsOpen = (req, res, next) => {
             else
                 res.status(403).send({error: "Event that is canceled, locked, ongoing, or finished may not be modified"});
         }).catch((err) => {
-            console.log("EVENTS err ", err)
             res.status(400).send(err);
         });
     }

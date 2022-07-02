@@ -5,7 +5,6 @@ exports.emailIsNotTaken = (req, res, next) => {
 
     Users.findByEmail(email).
         then((result) => {
-            //console.log(result)
             if(result.length > 0){
                 res.status(200).send({error:'email is already taken'});
             }

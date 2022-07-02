@@ -1,10 +1,12 @@
 const EventsController = require('./controllers/events.controller');
+const TeamsController = require('./controllers/teams.controller');
 const ReservationsController = require('./controllers/reservations.controller');
 const PermissionMiddleware = require('../common/middlewares/auth.permission.middleware');
 const ValidationMiddleware = require('../common/middlewares/auth.validation.middleware');
 const EventPermissionMiddleware = require('./middlewares/events.permission.middleware');
 const EventValidationMiddleware = require('./middlewares/events.validation.middleware');
 const ReservationValidationMiddleware = require('./middlewares/reservations.validation.middleware');
+const TeamsPermissionMiddleware = require('./middlewares/teams.permission.middleware')
 const config = require('../common/config/env.config');
 
 const ADMIN = config.permissionLevels.ADMIN;
@@ -70,5 +72,12 @@ exports.routesConfig = function (app) {
         ValidationMiddleware.validJWTNeeded,
         PermissionMiddleware.minimumPermissionLevelRequired(ADMIN),
         ReservationsController.list
+    ]);
+
+    app.get('/events/:eventId/teams', [
+        ValidationMiddleware.validJWTNeeded,
+        PermissionMiddleware.minimumPermissionLevelRequired(FREE),
+        TeamsPermissionMiddleware.onlyHostAdminOrTeamMemberCanDoThisAction,
+        TeamsController.listEventTeams
     ])
 };

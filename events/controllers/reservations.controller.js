@@ -28,11 +28,8 @@ exports.list = (req, res) => {
     if (req.query.groupId) query.groupId = req.query.groupId; // groupId is not an ObjectId
     if (req.query.reservationId) query._id = ObjectId(req.query.reservationId);
 
-    console.log("req.query.grouped: ", req.query.grouped)
-    console.log("conditional status: ", req.query.grouped && req.query.grouped === 'true')
 
     if (req.query.grouped && req.query.grouped === 'true'){
-        console.log("Grouped Listing...")
         ReservationModel.groupedList(limit, page, query)
         .then((result) => {
             res.status(200).send(result)
@@ -41,7 +38,6 @@ exports.list = (req, res) => {
         })
     }
     else{
-        console.log("Listing...")
         ReservationModel.list(limit, page, query)
         .then((result) => {
             res.status(200).send(result);
