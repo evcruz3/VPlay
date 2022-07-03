@@ -4,7 +4,8 @@ const Schema = mongoose.Schema;
 const matchStatSchema = new Schema({
     userId: {
         type: mongoose.Types.ObjectId,
-        required : true
+        required : true,
+        ref: 'Users'
     },
     season: {
         type: Number,

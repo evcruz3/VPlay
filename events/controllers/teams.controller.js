@@ -4,10 +4,32 @@ const ADMIN_PERMISSION = config['permissionLevels']['ADMIN'];
 const season = config.season
 const ObjectId = require('../../common/services/mongoose.service').mongoose.Types.ObjectId
 
-exports.insert = (req, res) => {
-    TeamModel.createTeam(req.body)
+exports.createEventTeams = (req, res) => {
+
+    let teams = []
+
+    try{
+        req.body.teams.forEach(element => {
+            let team = {};
+            
+            team.eventId = ObjectId(req.params.eventId)
+            team.open1 = ObjectId(element.open1)
+            team.open2 = ObjectId(element.open2)
+            team.opposite = ObjectId(element.opposite)
+            team.mid1 = ObjectId(element.mid1)
+            team.mid2 = ObjectId(element.mid2)
+            team.setter = ObjectId(element.setter)
+            if(element.libero) team.libero = ObjectId(element.libero)
+            teams.push(team)
+        });
+    } catch (error) {
+        console.log("try error: ", error)
+        res.status(400).send(error)
+    }
+
+    TeamModel.insertMany(teams)
         .then((result) => {
-            res.status(201).send({id: result._id});
+            res.status(201).send({result:result});
         }).catch((e) => {
             res.status(400).send(e)
             //res.status(400).send({error: e.name})
@@ -30,6 +52,15 @@ exports.listEventTeams = (req, res) => {
         })
     }
 };
+
+exports.deleteEventTeams = (req, res, next) => {
+    TeamModel.deleteMany(req.params.eventId)
+    .then((result) => {
+        next()
+    }).catch((e) => {
+        res.status(400).send(e)
+    })
+}
 
 exports.cancelTeam = (req, res) => {
     req.body.status = "canceled"

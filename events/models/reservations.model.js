@@ -10,7 +10,8 @@ const reservationSchema = new Schema({
     },
     playerId: {
         type: mongoose.Types.ObjectId,
-        required: true
+        required: true,
+        ref: 'Users'
     },
     status: {
         type: String,
@@ -19,7 +20,8 @@ const reservationSchema = new Schema({
     },
     eventId: {
         type: mongoose.Types.ObjectId,
-        required: true
+        required: true,
+        ref: 'Events'
     },
     groupId: {
         type: String,

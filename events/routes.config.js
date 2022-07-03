@@ -1,17 +1,20 @@
 const EventsController = require('./controllers/events.controller');
 const TeamsController = require('./controllers/teams.controller');
+const SchedulesController = require('./controllers/schedules.controller');
 const ReservationsController = require('./controllers/reservations.controller');
 const PermissionMiddleware = require('../common/middlewares/auth.permission.middleware');
 const ValidationMiddleware = require('../common/middlewares/auth.validation.middleware');
 const EventPermissionMiddleware = require('./middlewares/events.permission.middleware');
 const EventValidationMiddleware = require('./middlewares/events.validation.middleware');
 const ReservationValidationMiddleware = require('./middlewares/reservations.validation.middleware');
+const TeamValidationMiddleware = require('./middlewares/teams.validation.middleware');
 const TeamsPermissionMiddleware = require('./middlewares/teams.permission.middleware')
 const config = require('../common/config/env.config');
 
 const ADMIN = config.permissionLevels.ADMIN;
 const PAID = config.permissionLevels.PAID_USER;
 const FREE = config.permissionLevels.NORMAL_USER;
+const EVENT_MANAGER = config.permissionLevels.EVENT_MANAGER
 
 exports.routesConfig = function (app) {
     
@@ -63,7 +66,7 @@ exports.routesConfig = function (app) {
     app.post('/events/:eventId/reservations', [
         ValidationMiddleware.validJWTNeeded,
         PermissionMiddleware.minimumPermissionLevelRequired(FREE),
-        EventValidationMiddleware.eventIsOpen,
+        EventValidationMiddleware.eventStatusIs('open'),
         ReservationValidationMiddleware.UserHasNotReservedYet,
         ReservationsController.insert
     ]);
@@ -79,5 +82,33 @@ exports.routesConfig = function (app) {
         PermissionMiddleware.minimumPermissionLevelRequired(FREE),
         TeamsPermissionMiddleware.onlyHostAdminOrTeamMemberCanDoThisAction,
         TeamsController.listEventTeams
+    ]);
+
+    app.put('/events/:eventId/teams', [
+        ValidationMiddleware.validJWTNeeded,
+        PermissionMiddleware.minimumPermissionLevelRequired(EVENT_MANAGER),
+        EventValidationMiddleware.eventStatusIs('locked'),
+        TeamValidationMiddleware.TeamsFollowEventRules,
+        TeamValidationMiddleware.allEventTeamsPositionsAreFilled,
+        SchedulesController.deleteEventSchedule,
+        TeamsController.deleteEventTeams,
+        TeamsController.createEventTeams
     ])
+    
+    // TODO: check if each team object id exists
+    app.put('/events/:eventId/schedule', [
+        ValidationMiddleware.validJWTNeeded,
+        PermissionMiddleware.minimumPermissionLevelRequired(EVENT_MANAGER),
+        EventValidationMiddleware.eventStatusIs('locked'),
+        TeamValidationMiddleware.allEventTeamsIsInScheduleAndViceVersa,
+        SchedulesController.deleteEventSchedule,
+        SchedulesController.createEventSchedule
+    ]);
+
+    app.get('/events/:eventId/schedule', [
+        ValidationMiddleware.validJWTNeeded,
+        PermissionMiddleware.minimumPermissionLevelRequired(FREE),
+        TeamsPermissionMiddleware.onlyHostAdminOrTeamMemberCanDoThisAction,
+        SchedulesController.list
+    ]);
 };

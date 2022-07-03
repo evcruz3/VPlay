@@ -57,6 +57,19 @@ teamSchema.set('toJSON', {
 
 const Team = mongoose.model('Teams', teamSchema);
 
+exports.insertMany = (teams) => {
+    return new Promise((resolve, reject) => {
+        //const newDoc = new Schedule(document)
+        Team.insertMany(teams, function (err, teams){
+            if(err) {
+                reject(err)
+            } else {
+                resolve(teams)
+            }
+        })
+    })
+}
+
 exports.findById = (id) => {
     return Event.findById(id)
         .then((result) => {
@@ -94,18 +107,27 @@ exports.getEventTeams = (eventId) => {
     });
 }
 
+exports.deleteMany = (eventId) => {
+    return new Promise((resolve, reject) => {
+        Team.deleteMany({eventId:ObjectId(eventId)})
+        .exec(function (err, schedule){
+            if(err) {
+                reject(err)
+            } else {
+                resolve(schedule)
+            }
+        })
+    })
+}
+
 exports.getEventTeamsPopulated = (eventId) => {
     return new Promise((resolve, reject) => {
         Team.find({eventId: ObjectId(eventId)})
             .select("-id -eventId")
             .lean()
-            .populate({path:"open1", select:'username'})
-            .populate({path:"open2", select:'username'})
-            .populate({path:"opposite", select:'username'})
-            .populate({path:"mid1", select:'username'})
-            .populate({path:"mid2", select:'username'})
-            .populate({path:"setter", select:'username'})
-            .populate({path:"libero", select:'username'})
+            .populate(
+                {path:"open1 open2 opposite mid1 mid2 setter libero", 
+                select:'username'})
             .exec(function (err, teams) {
                 if (err) {
                     reject(err);

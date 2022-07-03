@@ -8,6 +8,7 @@ module.exports = {
     "permissionLevels": {
         "NORMAL_USER": 1,
         "PAID_USER": 4,
+        "EVENT_MANAGER" : 2047,
         "ADMIN": 2048
     },
     "season": 0

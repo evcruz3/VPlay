@@ -31,7 +31,8 @@ const eventSchema = new Schema({
     venue : mongoose.Types.ObjectId,
     host : {
         type: mongoose.Types.ObjectId,
-        required : true
+        required : true,
+        ref: 'Users'
     },
     season : {
         type: Number,
