@@ -1,6 +1,7 @@
 const EventsController = require('./controllers/events.controller');
 const TeamsController = require('./controllers/teams.controller');
 const SchedulesController = require('./controllers/schedules.controller');
+const MatchRecordsController = require('./controllers/matchrecords.controller');
 const ReservationsController = require('./controllers/reservations.controller');
 const PermissionMiddleware = require('../common/middlewares/auth.permission.middleware');
 const ValidationMiddleware = require('../common/middlewares/auth.validation.middleware');
@@ -71,6 +72,13 @@ exports.routesConfig = function (app) {
         ReservationsController.insert
     ]);
 
+    app.get('/events/:eventId/reservations/cancel', [
+        ValidationMiddleware.validJWTNeeded,
+        PermissionMiddleware.minimumPermissionLevelRequired(FREE),
+        EventValidationMiddleware.eventStatusIs('open'),
+        ReservationsController.cancelReservation
+    ]);
+
     app.get('/events/:eventId/reservations', [
         ValidationMiddleware.validJWTNeeded,
         PermissionMiddleware.minimumPermissionLevelRequired(ADMIN),
@@ -110,5 +118,66 @@ exports.routesConfig = function (app) {
         PermissionMiddleware.minimumPermissionLevelRequired(FREE),
         TeamsPermissionMiddleware.onlyHostAdminOrTeamMemberCanDoThisAction,
         SchedulesController.list
+    ]);
+
+    app.delete('/reservations/:reservationId', [
+        ValidationMiddleware.validJWTNeeded,
+        PermissionMiddleware.minimumPermissionLevelRequired(ADMIN),
+        ReservationsController.deleteReservation
+    ]);
+
+    app.patch('/reservations/:reservationId', [
+        ValidationMiddleware.validJWTNeeded,
+        PermissionMiddleware.minimumPermissionLevelRequired(ADMIN),
+        ReservationsController.patchReservation
+    ]);
+
+    app.get('/reservations/by/:userId', [
+        ValidationMiddleware.validJWTNeeded,
+        PermissionMiddleware.minimumPermissionLevelRequired(FREE),
+        PermissionMiddleware.onlySameUserOrAdminCanDoThisAction,
+        ReservationsController.listUserReservations
+    ]);
+
+    app.post('/events/:eventId/matchrecords', [
+        ValidationMiddleware.validJWTNeeded,
+        PermissionMiddleware.minimumPermissionLevelRequired(FREE),
+        // scheduleId should be in the eventId
+        EventPermissionMiddleware.onlyHostOrAdminCanDoThisAction,
+        MatchRecordsController.createMatchRecord
+    ]);
+
+    app.patch('/events/:eventId/matchrecords/:matchrecordId', [
+        ValidationMiddleware.validJWTNeeded,
+        PermissionMiddleware.minimumPermissionLevelRequired(FREE),
+        EventPermissionMiddleware.onlyHostOrAdminCanDoThisAction,
+        MatchRecordsController.patchMatchRecord
+    ]);
+
+    app.delete('/events/:eventId/matchrecords/:matchrecordId', [
+        ValidationMiddleware.validJWTNeeded,
+        PermissionMiddleware.minimumPermissionLevelRequired(ADMIN),
+        MatchRecordsController.deleteMatchRecord
+    ]);
+
+    app.get('/events/:eventId/matchrecords', [
+        ValidationMiddleware.validJWTNeeded,
+        PermissionMiddleware.minimumPermissionLevelRequired(FREE),
+        TeamsPermissionMiddleware.onlyHostAdminOrTeamMemberCanDoThisAction,
+        MatchRecordsController.listEventMatchRecords
+    ]);
+
+    app.get('/users/:userId/matchrecords', [
+        ValidationMiddleware.validJWTNeeded,
+        PermissionMiddleware.minimumPermissionLevelRequired(FREE),
+        PermissionMiddleware.onlySameUserOrAdminCanDoThisAction,
+        MatchRecordsController.listUserMatchRecords
+    ]);
+
+    app.get('/events/:eventId/matchrecords/of/:userId', [
+        ValidationMiddleware.validJWTNeeded,
+        PermissionMiddleware.minimumPermissionLevelRequired(FREE),
+        PermissionMiddleware.onlySameUserOrAdminCanDoThisAction,
+        MatchRecordsController.listUserEventMatchRecords
     ]);
 };

@@ -18,7 +18,7 @@ exports.UserHasNotReservedYet = (req, res, next) => {
 
     req.body.eventId = ObjectId(req.params.eventId)
 
-    let query = {eventId: req.body.eventId, playerId: req.body.playerId}
+    let query = {eventId: req.body.eventId, playerId: req.body.playerId, status : {"$in": ['waiting','not granted']}}
 
     Reservations.checkIfExisting(query).then((result) => {
         if (result){
@@ -28,6 +28,7 @@ exports.UserHasNotReservedYet = (req, res, next) => {
             next()
         }
     }).catch((err) => {
+        console.log(err)
         res.status(400).send(err);
     });
 }

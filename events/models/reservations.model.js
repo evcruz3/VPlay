@@ -77,6 +77,25 @@ exports.list = (perPage, page, query) => {
     return new Promise((resolve, reject) => {
         Reservation.find(query)
             .select()
+            .sort({_id:-1})
+            .limit(perPage)
+            .skip(perPage * page)
+            .exec(function (err, reservations) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(reservations);
+                }
+            })
+    });
+};
+
+exports.listPopulated = (perPage, page, query) => {
+    return new Promise((resolve, reject) => {
+        Reservation.find(query)
+            .select()
+            .sort({_id:-1})
+            .populate('eventId')
             .limit(perPage)
             .skip(perPage * page)
             .exec(function (err, reservations) {
@@ -158,8 +177,14 @@ exports.checkIfExisting = (query) => {
     });
 }
 
-exports.patchReservation = (id, reservationData) => {
+exports.patchReservation = (eventId, userId, reservationData) => {
     return Reservation.findOneAndUpdate({
+        eventId:eventId, playerId: userId, status:'waiting'
+    }, reservationData);
+};
+
+exports.patchById = (id, reservationData) => {
+    return Event.findOneAndUpdate({
         _id: id
     }, reservationData);
 };

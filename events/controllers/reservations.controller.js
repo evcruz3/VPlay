@@ -23,11 +23,12 @@ exports.list = (req, res) => {
             page = Number.isInteger(req.query.page) ? req.query.page : 0;
         }
     }
-    let query = {eventId:ObjectId(req.params.eventId)}
+    let query;
+    
+    query = {eventId:ObjectId(req.params.eventId)}
 
     if (req.query.groupId) query.groupId = req.query.groupId; // groupId is not an ObjectId
     if (req.query.reservationId) query._id = ObjectId(req.query.reservationId);
-
 
     if (req.query.grouped && req.query.grouped === 'true'){
         ReservationModel.groupedList(limit, page, query)
@@ -43,16 +44,66 @@ exports.list = (req, res) => {
             res.status(200).send(result);
         })
     }
-    
+        
 };
+
+exports.listUserReservations = (req, res) => {
+    let limit = req.query.limit && req.query.limit <= 100 ? parseInt(req.query.limit) : 10;
+    let page = 0;
+    if (req.query) {
+        if (req.query.page) {
+            req.query.page = parseInt(req.query.page);
+            page = Number.isInteger(req.query.page) ? req.query.page : 0;
+        }
+    }
+    let query;
+
+    query = {playerId:ObjectId(req.params.userId)}
+
+    if (req.query.populate === 'true') {
+        ReservationModel.listPopulated(limit, page, query)
+        .then((result) => {
+            res.status(200).send(result)
+        }).catch((err) => {
+            res.status(400).send(err)
+        })
+    }
+    else{
+        ReservationModel.list(limit, page, query)
+        .then((result) => {
+            res.status(200).send(result);
+        })
+    }
+}
 
 exports.cancelReservation = (req, res) => {
     req.body.status = "canceled"
+    let userId = ObjectId(req.jwt.userId)
+    let eventId = ObjectId(req.params.eventId)
 
-    ReservationModel.patchReservation(req.params.reservationId, req.body)
+    ReservationModel.patchReservation(eventId, userId, req.body)
         .then((result) => {
-            res.status(204).send({});
+            if(result)
+                res.status(200).send();
+            else
+                res.status(200).send({error: "you are not reserved for this event"});
         });
 
 };
+
+exports.deleteReservation = (req, res) => {
+    ReservationModel.removeById(req.params.reservationId)
+    .then((result) => {
+        res.status(204).send()
+    }).catch((err) => {
+        res.status(404).send()
+    });
+}
+
+exports.patchReservation = (req, res) => {
+    ReservationModel.patchById(req.params.reservationId, req.body)
+    .then((result) => {
+        res.status(204).send()
+    })
+}
 
