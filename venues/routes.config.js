@@ -1,5 +1,5 @@
 const VenuesController = require('./controllers/venues.controller');
-const PermissionMiddleware = require('../common/middlewares/auth.permission.middleware');
+const VenuePermissionMiddleware = require('./middelwares/venues.permission.middleware');
 const ValidationMiddleware = require('../common/middlewares/auth.validation.middleware');
 //const UserValidationMiddleware = require('../venues/middlewares/venues.validation.middleware');
 const config = require('../common/config/env.config');
@@ -15,32 +15,32 @@ exports.routesConfig = function (app) {
     app.post('/venues', [
         ValidationMiddleware.validJWTNeeded,
         PermissionMiddleware.minimumPermissionLevelRequired(FREE),
-        //VenuesController.insert
+        VenuesController.insert
     ]);
 
     app.get('/venues', [
         ValidationMiddleware.validJWTNeeded,
         PermissionMiddleware.minimumPermissionLevelRequired(FREE),
-        //VenuesController.list
+        VenuesController.list
     ]);
 
     app.get('/venues/:venueId', [
         ValidationMiddleware.validJWTNeeded,
         PermissionMiddleware.minimumPermissionLevelRequired(FREE),
-        //VenuesController.getById
+        VenuesController.getById
     ]);
 
     app.patch('/venues/:venueId', [
         ValidationMiddleware.validJWTNeeded,
         PermissionMiddleware.minimumPermissionLevelRequired(FREE),
-        //PermissionMiddleware.onlySameUserOrAdminCanDoThisAction,
-        //EventsController.patchById
+        VenuePermissionMiddleware.onlyAuthorOrAdminCanDoThisAction,
+        VenuesController.patchVenue
     ]);
 
     app.delete('/venues/:venueId', [
         ValidationMiddleware.validJWTNeeded,
         PermissionMiddleware.minimumPermissionLevelRequired(FREE),
-        //PermissionMiddleware.onlySameUserOrAdminCanDoThisAction,
-        //VenuesController.removeById
+        VenuePermissionMiddleware.onlyAuthorOrAdminCanDoThisAction,
+        VenuesController.removeVenue
     ]);
 };
