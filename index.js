@@ -1,12 +1,16 @@
 const config = require('./common/config/env.config.js');
+const https = require('https');
+const fs = require('fs');
 
 const express = require('express');
+const cors = require('cors');
 const app = express();
 
 const AuthorizationRouter = require('./authorization/routes.config');
 const UsersRouter = require('./users/routes.config');
 const EventsRouter = require('./events/routes.config')
 
+app.use(cors());
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Credentials', 'true');
@@ -20,12 +24,17 @@ app.use(function (req, res, next) {
     }
 });
 
+
 app.use(express.json());
 AuthorizationRouter.routesConfig(app);
 UsersRouter.routesConfig(app);
 EventsRouter.routesConfig(app);
 
+const httpsOptions = {
+    key: fs.readFileSync('./security/cert.key'),
+    cert: fs.readFileSync('./security/cert.pem')
+  }
 
-app.listen(config.port, function () {
+https.createServer(httpsOptions, app).listen(config.port, function () {
     console.log('app listening at port %s', config.port);
 });

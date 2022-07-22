@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/evcruz3/VPlay#readme",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "latest": "^0.2.0",

@@ -15,7 +15,9 @@ const userSchema = new Schema({
     },
     sex: String,
     birthday: Date,
-    positionPreference: [mongoose.Types.ObjectId],
+    positionPreferences: [{
+        type: mongoose.Types.ObjectId,
+        ref: 'PositionPreferences'}],
     permissionLevel: Number
 });
 
