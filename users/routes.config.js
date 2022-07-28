@@ -14,6 +14,7 @@ exports.routesConfig = function (app) {
     // hasValidEmail
     // hasValidPasswordLength
     app.post('/users', [
+        UserValidationMiddleware.hasUsername,
         UserValidationMiddleware.hasPassword,
         UserValidationMiddleware.emailIsNotTaken,
         UsersController.insert

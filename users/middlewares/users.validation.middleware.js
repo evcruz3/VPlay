@@ -24,3 +24,12 @@ exports.hasPassword = (req, res, next) => {
     }
 }
 
+exports.hasUsername = (req,res,next) => {
+    if(req.body.username){
+        next()
+    }
+    else{
+        res.status(400).send({error:'missing username field'});
+    }
+}
+
